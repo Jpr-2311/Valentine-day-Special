@@ -97,28 +97,39 @@ function App() {
   };
 
   // Function to send email notification
-  const sendEmail = (userName, action) => {
-    emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      {
-        title: 'Valentine App 💘',
-        name: userName,
-        message:
-          action === 'accepted'
-            ? 'User clicked YES and accepted'
-            : 'User started the Valentine flow',
-        email: 'no-reply@valentine.app'
+  const sendEmail = async (userName, action) => {
+    try {
+      const formData = new FormData();
+
+      formData.append(
+        "access_key",
+        import.meta.env.VITE_WEB3FORMS_KEY
+      );
+
+      formData.append("name", userName);
+      formData.append("subject", "Valentine App 💘");
+      formData.append(
+        "message",
+        action === "accepted"
+          ? "User clicked YES and accepted ❤️"
+          : "User entered name and started 💌"
+      );
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        console.error("Web3Forms error:", data);
       }
-    ).then(
-      () => {
-        console.log('✅ Email sent');
-      },
-      (error) => {
-        console.error('❌ Email failed:', error);
-      }
-    );
+    } catch (err) {
+      console.error("Web3Forms failed:", err);
+    }
   };
+
 
 
   const handleContinueClick = () => {
